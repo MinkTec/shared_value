@@ -1,6 +1,6 @@
 # shared_value
 
-A simple [shared_preferences](https://pub.dev/packages/shared_preferences).
+A simple [shared_preferences](https://pub.dev/packages/shared_preferences) wrapper.
 
 ## Usage
 
