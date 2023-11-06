@@ -16,13 +16,16 @@ class SharedValue<T> {
     }
   }
 
-  static Future<void> init() async => setPrefs(await SharedPreferences.getInstance());
+  static Future<void> init() async =>
+      setPrefs(await SharedPreferences.getInstance());
 
   static setPrefs(SharedPreferences prefs) => _prefs = prefs;
 
   T? get value => _prefs.containsKey(key) ? _prefs.get(key) as T : null;
 
-  set value(T? value) => _prefs.set(key, value as T);
+  set value(T? value) {
+    _prefs.set(key, value as T);
+  }
 
   setIfUnset(T val) {
     if (!_prefs.containsKey(key)) {
@@ -60,23 +63,34 @@ class SerdeSharedValue<T> extends SharedValue<T> {
 
 typedef _StringList = List<String>;
 
-class InvalidSharedPreferencesType extends TypeError {}
+class InvalidSharedPreferencesType implements Exception {
+  Type type;
+  InvalidSharedPreferencesType(this.type);
+  @override
+  String toString() {
+    return "InvalidSharedPreferencesType: $type";
+  }
+}
 
 extension _GetSetFunction on SharedPreferences {
   void set<T>(String key, T value) {
-    switch (T) {
-      case bool:
-        setBool(key, value as bool);
-      case int:
-        setInt(key, value as int);
-      case double:
-        setDouble(key, value as double);
-      case String:
-        setString(key, value as String);
-      case _StringList:
-        setStringList(key, value as List<String>);
-      default:
-        throw InvalidSharedPreferencesType();
+    if (null is T && value == null) {
+      remove(key);
+    } else {
+      switch (value.runtimeType) {
+        case bool:
+          setBool(key, value as bool);
+        case int:
+          setInt(key, value as int);
+        case double:
+          setDouble(key, value as double);
+        case String:
+          setString(key, value as String);
+        case _StringList:
+          setStringList(key, value as List<String>);
+        default:
+          throw InvalidSharedPreferencesType(T);
+      }
     }
   }
 }

@@ -23,7 +23,7 @@ await SharedValue.setPrefs(prefs);
 
 There are two main classes.
 SharedValue can be used to stare all data types SharedPreferences
-itself supports.
+itself supports and their nullable counterparts.
 
 To store other data types, the SerdeSharedValue class can be used.
 
@@ -36,7 +36,7 @@ final serdeSharedValue = SerdeSharedValue<DateTime>(
     initialValue: DateTime.now(),
     serializer: (
       serialize: (val) => val.toString(),
-      deserialize: (val) => DateTime.parse(val)
+      deserialize: DateTime.parse
     ));
 ```
 

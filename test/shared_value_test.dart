@@ -26,9 +26,8 @@ void main() async {
         SharedValue(key: "test key 1", initialValue: testVal);
     final SharedValue<int?> s2 = SharedValue(key: "k2", initialValue: null);
 
-
     final SharedValue<int> s3 =
-        SharedValue(key: "test key 1", initialValue: - testVal);
+        SharedValue(key: "test key 1", initialValue: -testVal);
 
     final now = DateTime.now();
 
@@ -40,6 +39,8 @@ void main() async {
         deserialize: (String x) => DateTime.parse(x)
       ),
     );
+
+    final SharedValue<String?> s5 = SharedValue(key: "k2");
 
     s1.value = testVal;
 
@@ -57,6 +58,16 @@ void main() async {
 
     test("retrival <DateTime>", () {
       expect(s4.value, now);
+    });
+
+    test("get / set String?", () {
+      expect(s5.value, null);
+
+      const val = "ok";
+      s5.value = val;
+      expect(s5.value, val);
+      s5.value = null;
+      expect(s5.value, null);
     });
   });
 }
