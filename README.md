@@ -45,14 +45,14 @@ the SharedPreferences instance.
 
 ### Access and update values
 
-Values can be accessed through the `value` getter.
+Values can be accessed through the `get` and `set` methods.
 ```dart
 
-sharedValue.value // = 349
+sharedValue.get(); // = 349
 
-sharedValue.value = 0
+sharedValue.set(0);
 
-sharedValue.value // = 0
+sharedValue.get(); // = 0
 ```
 
 If the value was not set before  `null` will be returned.
