@@ -33,32 +33,32 @@ void main() async {
 
     final SharedValue<String?> s5 = SharedValue(key: "k2");
 
-    s1.value = testVal;
+    s1.set(testVal);
 
     test("retrival <int>", () {
-      expect(s1.value, testVal);
+      expect(s1.get(), testVal);
     });
 
     test("no double initial value <int>", () {
-      expect(s3.value, testVal);
+      expect(s3.get(), testVal);
     });
 
     test("retrival <int?>", () {
-      expect(s2.value, null);
+      expect(s2.get(), null);
     });
 
     test("retrival <DateTime>", () {
-      expect(s4.value, now);
+      expect(s4.get(), now);
     });
 
     test("get / set String?", () {
-      expect(s5.value, null);
+      expect(s5.get(), null);
 
       const val = "ok";
-      s5.value = val;
-      expect(s5.value, val);
-      s5.value = null;
-      expect(s5.value, null);
+      s5.set(val);
+      expect(s5.get(), val);
+      s5.set(null);
+      expect(s5.get(), null);
     });
   });
 }

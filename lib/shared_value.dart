@@ -21,16 +21,14 @@ class SharedValue<T> {
 
   static setPrefs(SharedPreferences prefs) => _prefs = prefs;
 
-  T? get value => _prefs.containsKey(key) ? _prefs.get(key) as T : null;
+  bool get isSet => _prefs.containsKey(key);
 
-  set value(T? value) {
-    _prefs.set(key, value as T);
-  }
+  T? get() => isSet ? _prefs.get(key) as T : null;
+
+  set(T value) => _prefs.set(key, value);
 
   setIfUnset(T val) {
-    if (!_prefs.containsKey(key)) {
-      value = val;
-    }
+    if (!isSet) set(val);
   }
 }
 
@@ -48,17 +46,10 @@ class SerdeSharedValue<T> extends SharedValue<T> {
   }
 
   @override
-  T? get value =>
-      _serializer.deserialize(SharedValue._prefs.get(key) as String);
+  T? get() => _serializer.deserialize(SharedValue._prefs.get(key) as String);
 
   @override
-  set value(T? val) {
-    if (val != null) {
-      SharedValue._prefs.set(key, _serializer.serialize(val));
-    } else {
-      super.value = null;
-    }
-  }
+  set(T value) => SharedValue._prefs.set(key, _serializer.serialize(value));
 }
 
 typedef _StringList = List<String>;
