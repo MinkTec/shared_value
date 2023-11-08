@@ -4,15 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_value/shared_value.dart';
-import 'package:shared_value/shared_value_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-class MockSharedValuePlatform
-    with MockPlatformInterfaceMixin
-    implements SharedValuePlatform {
-  @override
-  Future<String?> getPlatformVersion() => Future.value('42');
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
