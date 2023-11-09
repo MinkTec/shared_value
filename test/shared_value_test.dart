@@ -10,6 +10,7 @@ void main() async {
 
   SharedPreferences.setMockInitialValues({});
   await SharedValue.setPrefs(await SharedPreferences.getInstance());
+
   group("basic", () {
     final testVal = Random().nextInt(100000);
 
@@ -21,34 +22,38 @@ void main() async {
         SharedValue(key: "test key 1", initialValue: -testVal);
 
     final now = DateTime.now();
+    final Serializer<DateTime> dateTimeSerde = (
+      serialize: (DateTime x) => x.toIso8601String(),
+      deserialize: (String x) => DateTime.parse(x)
+    );
 
     final SerdeSharedValue<DateTime> s4 = SerdeSharedValue(
       key: "dt2",
       initialValue: now,
-      serializer: (
-        serialize: (DateTime x) => x.toIso8601String(),
-        deserialize: (String x) => DateTime.parse(x)
-      ),
+      serializer: dateTimeSerde,
+    );
+
+    final SerdeSharedValue<DateTime> s6 = SerdeSharedValue(
+      key: "dt3",
+      serializer: dateTimeSerde,
     );
 
     final SharedValue<String?> s5 = SharedValue(key: "k2");
 
     s1.set(testVal);
 
-    test("retrival <int>", () {
-      expect(s1.get(), testVal);
-    });
+    test("retrival <int>", () => expect(s1.get(), testVal));
 
-    test("no double initial value <int>", () {
-      expect(s3.get(), testVal);
-    });
+    test("no double initial value <int>", () => expect(s3.get(), testVal));
 
-    test("retrival <int?>", () {
-      expect(s2.get(), null);
-    });
+    test("retrival <int?>", () => expect(s2.get(), null));
 
-    test("retrival <DateTime>", () {
-      expect(s4.get(), now);
+    test("retrival <DateTime>", () => expect(s4.get(), now));
+
+    test("unset retrival <DateTime>", () {
+      expect(s6.get(), null);
+      s6.set(now);
+      expect(s6.get(), now);
     });
 
     test("get / set String?", () {

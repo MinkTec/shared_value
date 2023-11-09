@@ -9,8 +9,7 @@ class SharedValue<T> {
   static late SharedPreferences _prefs;
   final String key;
 
-  SharedValue(
-      {required this.key, T? initialValue, SharedPreferences? preferences}) {
+  SharedValue({required this.key, T? initialValue}) {
     if (initialValue != null) {
       setIfUnset(initialValue);
     }
@@ -23,13 +22,15 @@ class SharedValue<T> {
 
   bool get isSet => _prefs.containsKey(key);
 
-  T? get() => isSet ? _prefs.get(key) as T : null;
+  T? get() => _prefs.get(key) as T?;
 
-  set(T value) => _prefs.set(key, value);
+  void set(T value) => _prefs.set(key, value);
 
-  setIfUnset(T val) {
+  void setIfUnset(T val) {
     if (!isSet) set(val);
   }
+
+  void deleteKey() => _prefs.remove(key);
 }
 
 class SerdeSharedValue<T> extends SharedValue<T> {
@@ -46,22 +47,17 @@ class SerdeSharedValue<T> extends SharedValue<T> {
   }
 
   @override
-  T? get() => _serializer.deserialize(SharedValue._prefs.get(key) as String);
+  T? get() {
+    final maybeString = SharedValue._prefs.get(key) as String?;
+    final value = (maybeString != null) ? _serializer.deserialize(maybeString) : null;
+    return value;
+  }
 
   @override
   set(T value) => SharedValue._prefs.set(key, _serializer.serialize(value));
 }
 
 typedef _StringList = List<String>;
-
-class InvalidSharedPreferencesType implements Exception {
-  Type type;
-  InvalidSharedPreferencesType(this.type);
-  @override
-  String toString() {
-    return "InvalidSharedPreferencesType: $type";
-  }
-}
 
 extension _GetSetFunction on SharedPreferences {
   void set<T>(String key, T value) {
@@ -83,5 +79,16 @@ extension _GetSetFunction on SharedPreferences {
           throw InvalidSharedPreferencesType(T);
       }
     }
+  }
+}
+
+class InvalidSharedPreferencesType implements Exception {
+  Type type;
+
+  InvalidSharedPreferencesType(this.type);
+
+  @override
+  String toString() {
+    return "InvalidSharedPreferencesType: $type";
   }
 }
