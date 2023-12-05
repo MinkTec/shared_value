@@ -5,14 +5,6 @@ typedef Serializer<T> = ({
   T Function(String val) deserialize
 });
 
-mixin SharedSerde<T> {
-  Serializer<T> get serializer;
-
-  SerdeSharedValue<T> getSharedValue({required String key, T? initialValue}) =>
-      SerdeSharedValue(
-          key: key, initialValue: initialValue, serializer: serializer);
-}
-
 class SharedValue<T> {
   static late SharedPreferences _prefs;
   final String key;
@@ -57,8 +49,7 @@ class SerdeSharedValue<T> extends SharedValue<T> {
   @override
   T? get() {
     final maybeString = SharedValue._prefs.get(key) as String?;
-    final value =
-        (maybeString != null) ? _serializer.deserialize(maybeString) : null;
+    final value = (maybeString != null) ? _serializer.deserialize(maybeString) : null;
     return value;
   }
 
