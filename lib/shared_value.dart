@@ -11,9 +11,9 @@ class SharedValue<T> {
 
   /// is called before the value is set in SharedPreferences
   /// any failure in onSet will cause the value not to be stored
-  final void Function(T val)? onSet;
+  final void Function(String key, T value)? onSet;
 
-  final void Function(T? val)? onGet;
+  final void Function(String key, T? value)? onGet;
 
   SharedValue({required this.key, T? initialValue, this.onSet, this.onGet}) {
     if (initialValue != null) {
@@ -30,13 +30,13 @@ class SharedValue<T> {
 
   T? get() {
     final value = _prefs.get(key) as T?;
-    onGet?.call(value);
+    onGet?.call(key, value);
     return value;
   }
 
   void set(T value) {
     _prefs.set(key, value);
-    onSet?.call(value);
+    onSet?.call(key, value);
   }
 
   void setIfUnset(T val) {
@@ -66,13 +66,13 @@ class SerdeSharedValue<T> extends SharedValue<T> {
     final maybeString = SharedValue._prefs.get(key) as String?;
     final value =
         (maybeString != null) ? _serializer.deserialize(maybeString) : null;
-    onGet?.call(value);
+    onGet?.call(key, value);
     return value;
   }
 
   @override
   set(T value) {
-    onSet?.call(value);
+    onSet?.call(key, value);
     SharedValue._prefs.set(key, _serializer.serialize(value));
   }
 }
