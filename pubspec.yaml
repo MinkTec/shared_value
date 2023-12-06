@@ -1,6 +1,6 @@
 name: shared_value
 description: A new Flutter plugin project.
-version: 0.0.2
+version: 0.1.0
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
