@@ -9,7 +9,13 @@ class SharedValue<T> {
   static late SharedPreferences _prefs;
   final String key;
 
-  SharedValue({required this.key, T? initialValue}) {
+  /// is called before the value is set in SharedPreferences
+  /// any failure in onSet will cause the value not to be stored
+  final void Function(T val)? onSet;
+
+  final void Function(T? val)? onGet;
+
+  SharedValue({required this.key, T? initialValue, this.onSet, this.onGet}) {
     if (initialValue != null) {
       setIfUnset(initialValue);
     }
@@ -22,9 +28,16 @@ class SharedValue<T> {
 
   bool get isSet => _prefs.containsKey(key);
 
-  T? get() => _prefs.get(key) as T?;
+  T? get() {
+    final value = _prefs.get(key) as T?;
+    onGet?.call(value);
+    return value;
+  }
 
-  void set(T value) => _prefs.set(key, value);
+  void set(T value) {
+    _prefs.set(key, value);
+    onSet?.call(value);
+  }
 
   void setIfUnset(T val) {
     if (!isSet) set(val);
@@ -36,11 +49,13 @@ class SharedValue<T> {
 class SerdeSharedValue<T> extends SharedValue<T> {
   final Serializer<T> _serializer;
 
-  SerdeSharedValue({
-    required super.key,
-    T? initialValue,
-    required Serializer<T> serializer,
-  }) : _serializer = serializer {
+  SerdeSharedValue(
+      {required super.key,
+      T? initialValue,
+      required Serializer<T> serializer,
+      super.onSet,
+      super.onGet})
+      : _serializer = serializer {
     if (initialValue != null) {
       setIfUnset(initialValue);
     }
@@ -49,12 +64,17 @@ class SerdeSharedValue<T> extends SharedValue<T> {
   @override
   T? get() {
     final maybeString = SharedValue._prefs.get(key) as String?;
-    final value = (maybeString != null) ? _serializer.deserialize(maybeString) : null;
+    final value =
+        (maybeString != null) ? _serializer.deserialize(maybeString) : null;
+    onGet?.call(value);
     return value;
   }
 
   @override
-  set(T value) => SharedValue._prefs.set(key, _serializer.serialize(value));
+  set(T value) {
+    onSet?.call(value);
+    SharedValue._prefs.set(key, _serializer.serialize(value));
+  }
 }
 
 typedef _StringList = List<String>;
