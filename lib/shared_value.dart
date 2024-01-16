@@ -5,20 +5,25 @@ typedef Serializer<T> = ({
   T Function(String val) deserialize
 });
 
+typedef OnSet<T> = void Function(String key, T value);
+
 class SharedValue<T> {
   static late SharedPreferences _prefs;
   final String key;
 
-  /// is called before the value is set in SharedPreferences
-  /// any failure in onSet will cause the value not to be stored
-  final void Function(String key, T value)? onSet;
+  /// is called after the value is set in SharedPreferences
+  final List<OnSet<T>> _listeners;
 
-  final void Function(String key, T? value)? onGet;
-
-  SharedValue({required this.key, T? initialValue, this.onSet, this.onGet}) {
+  SharedValue({required this.key, T? initialValue, OnSet<T>? onSet})
+      : _listeners = onSet != null ? [onSet] : [] {
     if (initialValue != null) {
       setIfUnset(initialValue);
     }
+  }
+
+  /// is called when a value is set
+  void addListener(OnSet<T> listener) {
+    _listeners.add(listener);
   }
 
   static Future<void> init() async =>
@@ -28,15 +33,11 @@ class SharedValue<T> {
 
   bool get isSet => _prefs.containsKey(key);
 
-  T? get() {
-    final value = _prefs.get(key) as T?;
-    onGet?.call(key, value);
-    return value;
-  }
+  T? get() => _prefs.get(key) as T?;
 
   void set(T value) {
     _prefs.set(key, value);
-    onSet?.call(key, value);
+    _listeners.forEach((f) => f(key, value));
   }
 
   void setIfUnset(T val) {
@@ -47,36 +48,37 @@ class SharedValue<T> {
 }
 
 class SerdeSharedValue<T> extends SharedValue<T> {
-  final Serializer<T> _serializer;
-
-  SerdeSharedValue(
-      {required super.key,
-      T? initialValue,
-      required Serializer<T> serializer,
-      super.onSet,
-      super.onGet})
-      : _serializer = serializer {
+  SerdeSharedValue({
+    required super.key,
+    T? initialValue,
+    required Serializer<T> serializer,
+    super.onSet,
+  })  : parse = serializer.deserialize,
+        serialize = serializer.serialize {
     if (initialValue != null) {
       setIfUnset(initialValue);
     }
   }
 
+  T Function(String string) parse;
+  String Function(T value) serialize;
+
+  String? getString() => SharedValue._prefs.get(key) as String?;
+
   @override
   T? get() {
     final maybeString = SharedValue._prefs.get(key) as String?;
-    final value =
-        (maybeString != null) ? _serializer.deserialize(maybeString) : null;
-    onGet?.call(key, value);
-    return value;
+    return (maybeString != null) ? parse(maybeString) : null;
   }
 
   @override
   set(T value) {
-    onSet?.call(key, value);
-    SharedValue._prefs.set(key, _serializer.serialize(value));
+    SharedValue._prefs.set(key, serialize(value));
+    _listeners.forEach((f) => f(key, value));
   }
 }
 
+// is defined because List<String> cannot be used in switch-case
 typedef _StringList = List<String>;
 
 extension _GetSetFunction on SharedPreferences {

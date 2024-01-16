@@ -70,22 +70,17 @@ void main() async {
 
   group("observability", () {
     dynamic valSet = 0;
-    dynamic valGet = 0;
 
     String setKey = "";
-    String getKey = "";
 
     final val = SharedValue<int>(
-        key: "test int",
-        initialValue: 34,
-        onSet: (key, val) {
-          setKey = key;
-          valSet = val;
-        },
-        onGet: (key, val) {
-          getKey = key;
-          valGet = val;
-        });
+      key: "test int",
+      initialValue: 34,
+      onSet: (key, val) {
+        setKey = key;
+        valSet = val;
+      },
+    );
 
     int i = 10;
 
@@ -95,25 +90,16 @@ void main() async {
       expect(setKey, val.key);
     });
 
-    test("onGet", () {
-      val.get();
-      expect(valGet, i);
-      expect(getKey, val.key);
-    });
-
     final now = DateTime.now();
 
     final serdeVal = SerdeSharedValue<DateTime>(
-        key: "test datetime",
-        serializer: dateTimeSerde,
-        onSet: (key, val) {
-          setKey = key;
-          valSet = val;
-        },
-        onGet: (key, val) {
-          getKey = key;
-          valGet = val;
-        });
+      key: "test datetime",
+      serializer: dateTimeSerde,
+      onSet: (key, val) {
+        setKey = key;
+        valSet = val;
+      },
+    );
 
     test("onSetSerde", () {
       serdeVal.set(now);
@@ -121,10 +107,5 @@ void main() async {
       expect(setKey, serdeVal.key);
     });
 
-    test("onGet serde", () {
-      serdeVal.get();
-      expect(getKey, serdeVal.key);
-      expect(valGet, now);
-    });
   });
 }
