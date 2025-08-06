@@ -114,3 +114,19 @@ class InvalidSharedPreferencesType implements Exception {
     return "InvalidSharedPreferencesType: $type";
   }
 }
+
+mixin Cached<T> on SharedValue<T> {
+  T? _value;
+
+  void init() {
+    _value = get();
+  }
+
+  T? getCached() => _value;
+
+  @override
+  void set(T value) {
+    _value = value;
+    super.set(value);
+  }
+}
