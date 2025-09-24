@@ -118,15 +118,40 @@ class InvalidSharedPreferencesType implements Exception {
 mixin Cached<T> on SharedValue<T> {
   T? _value;
 
+  bool _wasInitialized = false;
+
   void init() {
+    _wasInitialized = true;
     _value = get();
   }
 
-  T? getCached() => _value;
+  T? getCached() {
+    if (_wasInitialized) {
+      return _value;
+    } else {
+      init();
+      return _value;
+    }
+  }
 
   @override
   void set(T value) {
     _value = value;
     super.set(value);
   }
+}
+
+class CachedSharedValue<T> extends SharedValue<T> with Cached {
+  CachedSharedValue({
+    required String key,
+    T? initialValue,
+  }) : super(key: key, initialValue: initialValue);
+}
+
+class CachedSerdeSharedValue<T> extends SerdeSharedValue<T> with Cached {
+  CachedSerdeSharedValue({
+    required super.key,
+    super.initialValue,
+    required super.serializer,
+  });
 }
