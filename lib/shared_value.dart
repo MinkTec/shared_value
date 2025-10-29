@@ -145,6 +145,7 @@ class CachedSharedValue<T> extends SharedValue<T> with Cached {
   CachedSharedValue({
     required String key,
     T? initialValue,
+    super.onSet,
   }) : super(key: key, initialValue: initialValue);
 }
 
